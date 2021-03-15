@@ -679,6 +679,7 @@ class MIDITrack(object):
         self.MIDIEventList = []
         self.remdep = removeDuplicates
         self.deinterleave = deinterleave
+        self.endTick = None
 
     def addNoteByNumber(self, channel, pitch, tick, duration, volume,
                         annotation=None, insertion_order=0):
@@ -795,6 +796,13 @@ class MIDITrack(object):
         self.eventList.append(Text(tick, text,
                               insertion_order=insertion_order))
 
+    def addEndOfTrack(self, tick):
+        '''
+        Add end-of-track event. This is optional; if omitted, simply uses the
+        last normal event.
+        '''
+        self.endTick = tick
+
     def changeNoteTuning(self, tunings, sysExChannel=0x7F, realTime=True,
                          tuningProgam=0, insertion_order=0):
         '''
@@ -870,10 +878,6 @@ class MIDITrack(object):
 
         self.writeEventsToStream()
 
-        # Write MIDI close event.
-
-        self.MIDIdata += struct.pack('BBBB', 0x00, 0xFF, 0x2F, 0x00)
-
         # Calculate the entire length of the data and write to the header
 
         self.dataLength = struct.pack('>L', len(self.MIDIdata))
@@ -890,6 +894,22 @@ class MIDITrack(object):
             # I do not like that adjustTimeAndOrigin() changes GenericEvent.tick
             # from absolute to relative. I intend to change that, and just
             # calculate the relative tick here, without changing GenericEvent.tick
+
+        
+        # Write MIDI close event.
+        
+        code = 0xFF
+        subcode = 0x2F
+        varTime = struct.pack('>B', 0)
+        if self.endTick:
+            if self.endTick > previous_event_tick:
+                varTime = writeVarLength(self.endTick - previous_event_tick)
+        for timeByte in varTime:
+            self.MIDIdata += struct.pack('>B', timeByte)
+        self.MIDIdata += struct.pack('>B', code)
+        self.MIDIdata += struct.pack('>B', subcode)
+        self.MIDIdata += struct.pack('>B', 0)
+
 
     def deInterleaveNotes(self):
         '''
@@ -1221,7 +1241,17 @@ class MIDIFile(object):
 
 
     def addMarker(self, track, time, string=""):
+        '''
+        Add a marker event.
 
+        :param track: The track to which the signature is assigned. Note that
+            in a format 1 file this parameter is ignored and the event is
+            written to the tempo track
+        :param time: The time (in beats) at which the event is placed.
+            In general this should probably be time 0 (the beginning of the
+            track).
+        :param string: the string associated with the marker. Can be empty.
+        '''
         if self.header.numeric_format == 1:
             track = 0
 
@@ -1315,6 +1345,23 @@ class MIDIFile(object):
         self.tracks[track].addText(self.time_to_ticks(time), text,
                                    insertion_order=self.event_counter)
         self.event_counter += 1
+
+    def addEndOfTrack(self, track, time):
+        """
+
+        Add end-of-track event. Optional
+
+        :param track: The track to which the end-of-track is added.
+        :param time: The time (in beats) at which to end the track.
+        
+        In type-1 files, sets the same value to all tracks ("track" parameter
+        is ignored).
+        """
+        if self.header.numeric_format == 1:
+            for tk in self.tracks:
+                tk.addEndOfTrack(self.time_to_ticks(time))
+        else:
+            self.tracks[track].addEndOfTrack(self.time_to_ticks(time))
 
     def addProgramChange(self, tracknum, channel, time, program):
         """
