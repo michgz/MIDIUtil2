@@ -1,7 +1,7 @@
 Common Events and Function
 ==========================
 
-.. currentmodule:: midiutil.MidiFile
+.. currentmodule:: midiutil2.MidiFile
 
 This page lists some of the more common things that a user is likely to
 do with the MIDI file. It is not exhaustive; see the class reference for a more

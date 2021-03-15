@@ -4,13 +4,13 @@ from setuptools import setup, find_packages
 with open('README.rst') as file:
     long_description = file.read()
 
-setup(name='MIDIUtil',
+setup(name='MIDIUtil2',
       version='1.2.1',
       description='A pure python library for creating multi-track MIDI files',
-      author='Mark Conway Wirt',
+      author='Mark Conway Wirt;MichGZ',
       author_email='MarkCWirt@gmail.com',
       license='MIT',
-      url='https://github.com/MarkCWirt/MIDIUtil',
+      url='https://github.com/MichGZ/MIDIUtil2',
       packages=find_packages(where="src"),
       package_dir = {'': 'src'},
       package_data={

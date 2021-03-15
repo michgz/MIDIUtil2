@@ -3,7 +3,7 @@
 Class Reference
 ===============
 
-.. currentmodule:: midiutil.MidiFile
+.. currentmodule:: midiutil2.MidiFile
 
 .. autoclass:: MIDIFile
   :members: addNote, addTrackName, addTempo, addProgramChange, addControllerEvent, makeRPNCall, makeNRPNCall, changeTuningBank, changeTuningProgram, addPitchWheelEvent,

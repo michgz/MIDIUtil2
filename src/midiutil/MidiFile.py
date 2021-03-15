@@ -632,6 +632,36 @@ class TimeSignature(GenericEvent):
         midibytes += struct.pack('>B', self.notes_per_quarter)
         return midibytes
 
+class Marker(GenericEvent):
+    '''
+    A class that encapsulates a marker.
+    '''
+    evtname = 'Marker'
+    sec_sort_order = 0
+
+    def __init__(self, tick, string, insertion_order=0):
+        self.string = string
+        super(Marker, self).__init__(tick, insertion_order)
+
+    def serialize(self, previous_event_tick):
+        """Return a bytestring representation of the event, in the format required for
+        writing into a standard midi file.
+        """
+        midibytes = b""
+        code = 0xFF
+        subcode = 0x06
+        varTime = writeVarLength(self.tick - previous_event_tick)
+        for timeByte in varTime:
+            midibytes += struct.pack('>B', timeByte)
+        midibytes += struct.pack('>B', code)
+        midibytes += struct.pack('>B', subcode)
+        midibytes += struct.pack('>B', len(self.string))
+        midibytes += self.string.encode('ascii')
+        return midibytes
+
+
+
+
 
 class MIDITrack(object):
     '''
@@ -735,6 +765,12 @@ class MIDITrack(object):
         self.eventList.append(TimeSignature(tick, numerator, denominator,
                                             clocks_per_tick, notes_per_quarter,
                                             insertion_order=insertion_order))
+    def addMarker(self, tick, string="", insertion_order=0):
+        '''
+        Add a time signature.
+        '''
+        self.eventList.append(Marker(tick, string,
+                                              insertion_order=insertion_order))
 
     def addCopyright(self, tick, notice, insertion_order=0):
         '''
@@ -1182,6 +1218,17 @@ class MIDIFile(object):
                                             clocks_per_tick, notes_per_quarter,
                                             insertion_order=self.event_counter)
         self.event_counter += 1
+
+
+    def addMarker(self, track, time, string=""):
+
+        if self.header.numeric_format == 1:
+            track = 0
+
+        self.tracks[track].addMarker(self.time_to_ticks(time), string,
+                                            insertion_order=self.event_counter)
+        self.event_counter += 1
+
 
     def addTempo(self, track, time, tempo):
         """

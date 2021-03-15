@@ -18,9 +18,9 @@ import struct
 
 import unittest
 
-from midiutil.MidiFile import *
+from midiutil2.MidiFile import *
 
-from midiutil.MidiFile import writeVarLength,  \
+from midiutil2.MidiFile import writeVarLength,  \
     frequencyTransform, returnFrequency, MAJOR, MINOR, SHARPS, FLATS, MIDIFile
 
 
@@ -941,7 +941,7 @@ def suite():
 
 
 if __name__ == '__main__':
-    print("Begining MIDIUtil Test Suite")
+    print("Begining MIDIUtil2 Test Suite")
     MIDISuite = suite()
     runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout)
     return_value = not runner.run(MIDISuite).wasSuccessful()

@@ -4,7 +4,7 @@
 ############################################################################
 
 # Import the library
-from midiutil import MIDIFile
+from midiutil2 import MIDIFile
 
 # Create the MIDIFile Object
 MyMIDI = MIDIFile(1)
