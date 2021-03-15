@@ -1928,3 +1928,103 @@ def sort_events(event):
     '''
 
     return (event.tick, event.sec_sort_order, event.insertion_order)
+
+
+
+def readFile(filehandle):
+  
+    if filehandle.read(4) != b'MThd':
+        raise Exception("File does not start with MThd")
+    
+    headerSize = struct.unpack('>L', filehandle.read(4))[0]
+    if headerSize != 6:
+        raise Exception("Header should be 6 bytes long, found {0}".format(headerSize))
+        
+    fileFormat = struct.unpack('>H', filehandle.read(2))[0]
+    numTracks = struct.unpack('>H', filehandle.read(2))[0]
+    ticks_per_quarternote = struct.unpack('>H', filehandle.read(2))[0]
+
+    mf = MIDIFile(numTracks)
+
+
+    for i in range(numTracks):
+      
+        tk = MIDITrack(True, True)
+        
+        headerString = filehandle.read(4)
+        if headerString != b'MTrk':
+            raise Exception("Track does not start with MTrk")
+            
+        dataLength = struct.unpack('>L', filehandle.read(4))[0]
+        MIDIdata = filehandle.read(dataLength)
+        
+        offset = 0
+        ticks = 0
+        event_counter = 0
+        
+        while True:
+            
+            delta_ticks, bytesRead = readVarLength(offset, MIDIdata)
+            
+            ticks += delta_ticks
+            offset += bytesRead
+            
+            event = struct.unpack_from('>B', MIDIdata, offset)[0]
+            offset += 1
+            
+            if event < 0x80:
+                raise Exception("Invalid event {0:02X}".format(event))
+                
+            event_type = event & 0xF0
+            event_ch = event & 0x0F
+            
+            if event_type == 0xB0:
+                # Control change
+              
+                controller_number = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+                parameter = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+
+                tk.addControllerEvent(event_ch, ticks, controller_number, parameter, insertion_order=event_counter)
+                event_counter += 1
+            elif event_type == 0x90:
+                # Note on
+                
+                pitch = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+                volume = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+
+                tk.eventList.append(NoteOn(event_ch, pitch, ticks, 1, volume, insertion_order=event_counter))  # Duration of 1. This will be tidied on the second pass
+                event_counter += 1
+
+            elif event_type == 0x80:
+                # Note off
+                
+                pitch = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+                volume = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+
+                tk.eventList.append(NoteOff(event_ch, pitch, ticks, volume, insertion_order=event_counter))  # Duration of 1. This will be tidied on the second pass
+                event_counter += 1
+
+            elif event == 0xFF:
+              
+                subevent = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+                length = struct.unpack_from('>B', MIDIdata, offset)[0]
+                offset += 1
+                
+                offset += length # discard the data
+                
+                if subevent == 0x2F:  # end of track
+                  
+                    tk.endTick = ticks
+                    break
+                    
+        mf.tracks[i] = tk   # Replace
+        
+    return mf
+
