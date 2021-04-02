@@ -7,7 +7,7 @@ Background
 The library [MIDIUtil](https://pypi.python.org/pypi/MIDIUtil/) by Mark Wirt is a
 very nice way of creating standard MIDI files in Python. It's lightweight,
 simple to get up-and-running with and it has the advantage of having notes
-specified as _start_ _time_ + _duration_ rather than _start_ _time_ + _end_ _time_
+specified as *start time* + *duration* rather than *start time* + *end time*
 which is usual for most MIDI software.
 
 It is however missing a few features, most notably reading data from existing
@@ -54,9 +54,7 @@ Add Marker
     
     Parameters:	
 
-        track – The track to which the notice is added. Note that in a format 1
-                file this parameter is ignored and the marker is written to the
-                system track
+        track – The track to which the notice is added. Note that in a format 1 file this parameter is ignored and the marker is written to the system track
                 
         time – The time (in beats) at which marker event is placed.
         
@@ -75,9 +73,7 @@ Add End-Of-Track
     
     Parameters:	
 
-        track – The track to which the notice is added. Note that in a format 1
-                file this parameter is ignored and the same end-of-track time is
-                assigned to all tracks, including the system track.
+        track – The track to which the notice is added. Note that in a format 1 file this parameter is ignored and the same end-of-track time is assigned to all tracks, including the system track.
                 
         time – The time (in beats) at which notice event is placed.
 
