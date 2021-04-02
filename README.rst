@@ -53,7 +53,6 @@ Add Marker
     Add a MIDI marker event to the MIDIFile object
     
     Parameters:	
-
         track – The track to which the notice is added. Note that in a format 1 file this parameter is ignored and the marker is written to the system track
                 
         time – The time (in beats) at which marker event is placed.
@@ -72,7 +71,6 @@ Add End-Of-Track
     the final portion of it has no events.
     
     Parameters:	
-
         track – The track to which the notice is added. Note that in a format 1 file this parameter is ignored and the same end-of-track time is assigned to all tracks, including the system track.
                 
         time – The time (in beats) at which notice event is placed.
@@ -86,7 +84,6 @@ Read MIDI
     can be read.
     
     Parameters:
-
         fileHandle - a file handle that has been opened for binary read.
 
 
