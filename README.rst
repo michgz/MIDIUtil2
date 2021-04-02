@@ -4,10 +4,10 @@ MIDIUtil2
 Background
 ----------
 
-The library [MIDIUtil|https://pypi.python.org/pypi/MIDIUtil/] by Mark Wirt is a
+The library [MIDIUtil](https://pypi.python.org/pypi/MIDIUtil/) by Mark Wirt is a
 very nice way of creating standard MIDI files in Python. It's lightweight,
 simple to get up-and-running with and it has the advantage of having notes
-specified as _start time_ + _duration_ rather than _start time_ + _end time_
+specified as _start_ _time_ + _duration_ rather than _start_ _time_ + _end_ _time_
 which is usual for most MIDI software.
 
 It is however missing a few features, most notably reading data from existing
@@ -51,12 +51,15 @@ Add Marker
  addMarker(track, time, text="")
 
     Add a MIDI marker event to the MIDIFile object
+    
     Parameters:	
 
         track – The track to which the notice is added. Note that in a format 1
                 file this parameter is ignored and the marker is written to the
                 system track
+                
         time – The time (in beats) at which marker event is placed.
+        
         text – The marker text [String]. May be left empty
 
 
@@ -69,11 +72,13 @@ Add End-Of-Track
     track is simply at the same time as the last event of the track. In some
     cases though it is useful to enforce a minimum track length, even if
     the final portion of it has no events.
+    
     Parameters:	
 
         track – The track to which the notice is added. Note that in a format 1
                 file this parameter is ignored and the same end-of-track time is
                 assigned to all tracks, including the system track.
+                
         time – The time (in beats) at which notice event is placed.
 
 Read MIDI
@@ -83,6 +88,7 @@ Read MIDI
 
     Reads a MIDI file into a MIDIFile object. Currently only Type-1 MIDI files
     can be read.
+    
     Parameters:
 
         fileHandle - a file handle that has been opened for binary read.
@@ -92,7 +98,7 @@ Quick Start
 -----------
 
 For quick start on creating and writing MIDI files, see
-[MIDIUtil|https://github.com/MarkCWirt/MIDIUtil].
+[MIDIUtil](https://github.com/MarkCWirt/MIDIUtil).
 
 Reading a Type-1 MIDI file is as simple as calling `readFile()`. Tracks within
 the MIDI file can then be iterated over or replaced, and the MIDI file can be
