@@ -23,6 +23,10 @@ from midiutil2.MidiFile import *
 from midiutil2.MidiFile import writeVarLength,  \
     frequencyTransform, returnFrequency, MAJOR, MINOR, SHARPS, FLATS, MIDIFile
 
+from tempfile import gettempdir
+import os
+import os.path
+import filecmp
 
 class Decoder(object):
     '''
@@ -932,6 +936,64 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addUniversalSysEx(track, time, code, subcode, payload, realTime=True)
         MyMIDI.close()
         self.assertEqual(2, len(MyMIDI.tracks[1].eventList))
+
+    def testEndOfTrack(self):
+        
+        MyMIDI = MIDIFile(1, ticks_per_quarternote=480)
+        MyMIDI.addTimeSignature(0, 0, 4, 2, 8)
+        MyMIDI.addNote(0, 0, 60, 0, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 1, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 2, 0.75, 55)
+        MyMIDI.addNote(0, 0, 60, 4, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 5, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 6, 0.75, 55)
+        
+        with open(os.path.join(gettempdir(), "TestEndOfTrack_1.mid"), "wb") as f_midi:
+          MyMIDI.writeFile(f_midi)
+          
+        MyMIDI = MIDIFile(1, ticks_per_quarternote=480)
+        MyMIDI.addTimeSignature(0, 0, 4, 2, 8)
+        MyMIDI.addNote(0, 0, 60, 0, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 1, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 2, 0.75, 55)
+        MyMIDI.addNote(0, 0, 60, 4, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 5, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 6, 0.75, 55)
+        MyMIDI.addEndOfTrack(0, 6.65)
+          
+        with open(os.path.join(gettempdir(), "TestEndOfTrack_2.mid"), "wb") as f_midi:
+          MyMIDI.writeFile(f_midi)
+
+        # No "End-Of-Track" and "End-Of-Track" placed before the final note event
+        # should give the same result
+        #  --- Actually, not correct. The system track end comes at a different
+        #      time. This test is commented for now.
+        #self.assertTrue(filecmp.cmp(os.path.join(gettempdir(), "TestEndOfTrack_1.mid"), os.path.join(gettempdir(), "TestEndOfTrack_2.mid")))
+
+        MyMIDI = MIDIFile(1, ticks_per_quarternote=480)
+        MyMIDI.addTimeSignature(0, 0, 4, 2, 8)
+        MyMIDI.addNote(0, 0, 60, 0, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 1, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 2, 0.75, 55)
+        MyMIDI.addNote(0, 0, 60, 4, 0.75, 55)
+        MyMIDI.addNote(0, 0, 64, 5, 0.75, 55)
+        MyMIDI.addNote(0, 0, 67, 6, 0.75, 55)
+        MyMIDI.addEndOfTrack(0, 8)
+          
+        with open(os.path.join(gettempdir(), "TestEndOfTrack_3.mid"), "wb") as f_midi:
+          MyMIDI.writeFile(f_midi)
+
+        # No "End-Of-Track" and "End-Of-Track" placed after the final note event
+        # should give a different result
+
+        self.assertFalse(filecmp.cmp(os.path.join(gettempdir(), "TestEndOfTrack_1.mid"), os.path.join(gettempdir(), "TestEndOfTrack_3.mid")))
+
+
+        os.remove(os.path.join(gettempdir(), "TestEndOfTrack_1.mid"))
+        os.remove(os.path.join(gettempdir(), "TestEndOfTrack_2.mid"))
+        os.remove(os.path.join(gettempdir(), "TestEndOfTrack_3.mid"))
+
+
 
 
 def suite():

@@ -976,7 +976,10 @@ class MIDITrack(object):
             tempEventList.append(event)
 
         self.MIDIEventList = tempEventList
-        adjustedTick = event.tick - internal_origin
+        if self.endTick:
+          adjustedTick = self.endTick - internal_origin
+        else:
+          adjustedTick = runningTick
         self.endTick = adjustedTick - runningTick
 
     def writeTrack(self, fileHandle):
